@@ -1,4 +1,5 @@
 {
+    "parallelMax": 5,
     "list": [
         {
             "m3u8Url": "https://yushou.qitu-zuida.com/20180716/9370_8a4932d6/800k/hls/index.m3u8",
