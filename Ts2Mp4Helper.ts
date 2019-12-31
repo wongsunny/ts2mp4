@@ -2,6 +2,16 @@ import * as https from 'https'
 import * as fs from 'fs-extra'
 import * as path from 'path'
 import * as child_process from 'child_process'
+const debug = false
+
+var myLog = (message?: any, ...optionalParams: any[]) => {
+    debug && console.log(message, optionalParams)
+}
+var myError = (message?: any, ...optionalParams: any[]) => {
+    debug && console.error(message, optionalParams)
+}
+
+console.log('是否开启debug模式:', debug)
 
 class Ts2Mp4Helper {
     private m3u8Url: string //m3u8文件路径
@@ -48,10 +58,10 @@ class Ts2Mp4Helper {
     }
 
     async ts2Mp4() {
-        console.log('开始下载:', this.mp4Name)
+        myLog('开始下载:', this.mp4Name)
         if (fs.existsSync(this.mp4SavePath)) {
-            console.log('该视频已存在,跳过合成', this.mp4SavePath)
-            return
+            myLog('该视频已存在,跳过合成', this.mp4SavePath)
+            return Promise.resolve(this.mp4SavePath)
         }
         //下注 .m3u8
         await this.downloadM3u8File()
@@ -61,7 +71,7 @@ class Ts2Mp4Helper {
         let successTsList = await this.downloadTsList(tsList)
         //生成FFmpeg配置文件
         this.createFfmpegConfig(successTsList)
-        return await this.useFfmpegCompoundMp4()
+        return this.useFfmpegCompoundMp4()
     }
 
 
@@ -94,19 +104,19 @@ class Ts2Mp4Helper {
                         let oStream = fs.createWriteStream(savePath)
                         res.pipe(oStream)
                         oStream.on('open', () => {
-                            //console.log('文件开始写入')
+                            myLog('文件开始写入')
                         })
                         oStream.on('close', () => {
-                            console.log('写入完成', url)
+                            myLog('写入完成', url)
                             return resolve(savePath)
                         })
                     } else {
-                        console.error('https返回状态错误', res.statusCode, url)
+                        myError('https返回状态错误', res.statusCode, this.mp4Name)
                         return reject(savePath)
                     }
                 })
                 client.on('error', (e) => {
-                    console.error('https 请求失败了', e);
+                    myError('https 请求失败了', e);
                     return reject(savePath)
                 })
                 client.end()
@@ -126,7 +136,7 @@ class Ts2Mp4Helper {
         return this.https_request(url, savePath)
             .then((data) => {
                 if (data == 'timeout' && connectCount > 0) {
-                    console.log('请求超时了,重新请求')
+                    myLog('请求超时了,重新请求')
                     return this.https_request_byCount(url, savePath, --connectCount)
                 }
                 return Promise.resolve(data)
@@ -138,15 +148,15 @@ class Ts2Mp4Helper {
      * 下载m3u8文件
      */
     private async downloadM3u8File() {
-        console.log('下载m3u8文件', this.m3u8Url)
+        myLog('下载m3u8文件', this.m3u8Url)
         if (fs.existsSync(this.m3u8SavePath)) {
-            console.log('已经存在m3u8文件,跳过下载', this.m3u8SavePath)
+            myLog('已经存在m3u8文件,跳过下载', this.m3u8SavePath)
             return
         }
         try {
             await this.https_request_byCount(this.m3u8Url, this.m3u8SavePath, 1)
         } catch (error) {
-            console.error('下载m3u8文件失败了', this.m3u8SavePath)
+            myError('下载m3u8文件失败了', this.m3u8SavePath)
         }
     }
 
@@ -154,7 +164,7 @@ class Ts2Mp4Helper {
      *下载所有ts片段 
      */
     private async downloadTsList(tsList: string[]): Promise<string[]> {
-        console.log('下载所有ts片段 ')
+        myLog('下载所有ts片段 ')
         let successList: string[] = []
         outter:
         for (const ts of tsList) {
@@ -172,7 +182,7 @@ class Ts2Mp4Helper {
                 }
                 let tsSavePath = `${this.tsSavePath}/${tsName}`
                 if (fs.existsSync(tsSavePath)) {
-                    console.log('ts文件已经存在了,跳过下载', tsSavePath)
+                    myLog('ts文件已经存在了,跳过下载', tsSavePath)
                     successList.push(ts)
                     continue outter;
                 }
@@ -182,7 +192,7 @@ class Ts2Mp4Helper {
                     successList.push(ts)
                     continue inner;
                 } catch (error) {
-                    console.log('请求下载ts片段出错了', tsUrl)
+                    myError('请求下载ts片段出错了', tsUrl)
                 }
             }
         }
@@ -193,7 +203,7 @@ class Ts2Mp4Helper {
      * 解析 .m3u8文件找出所有ts视频片段 
      */
     private analyzeM3u8() {
-        console.log('解析 .m3u8文件找出所有ts视频片段  ')
+        myLog('解析 .m3u8文件找出所有ts视频片段  ')
         let content = fs.readFileSync(this.m3u8SavePath, { encoding: 'utf8' })
         let rows = content.split('\n')
         rows = rows.filter((item) => {
@@ -208,16 +218,21 @@ class Ts2Mp4Helper {
      * 注:ffmpg不支持路径配置 需要和ts在同一个目录下
      */
     private createFfmpegConfig(tsList: string[]) {
-        console.log(' 生成ffmpg批量合成的配置文件')
+        myLog(' 生成ffmpg批量合成的配置文件')
         let row_1 = 'ffconcat version 1.0\n'
         let content = row_1
-        for (const ts of tsList) {
+        for (let ts of tsList) {
+            //m3u8中可能是相当于hostname的路径名
+            let tempArr = ts.split('/')
+            if (tempArr.length > 0) {
+                ts = tempArr.pop()
+            }
             let fullPath = `${this.tsSavePath}/${ts}`
             if (this.checkTsFormat(fullPath)) {
                 //格式正确才参与MP4的合成
                 content += `file\t${ts}\n`
             } else {
-                console.error('ts格式错误!', fullPath)
+                myError('ts格式错误!', fullPath)
             }
         }
         fs.writeFileSync(this.ffmpegConfigSavePath, content)
@@ -237,7 +252,7 @@ class Ts2Mp4Helper {
      * ffmpeg -i input.txt -acodec copy -vcodec copy -absf aac_adtstoasc ${resultFile}
      */
     private useFfmpegCompoundMp4(): Promise<string> {
-        console.log(' 使用FFmpeg合成MP4')
+        myLog(' 使用FFmpeg合成MP4')
         return new Promise((resolve, reject) => {
             let ls = child_process.spawn(
                 'ffmpeg',
@@ -254,19 +269,19 @@ class Ts2Mp4Helper {
                 ])
 
             ls.stdout.on('data', (data) => {
-                console.log(`FFmpeg msg: ${data}`);
+                myLog(`FFmpeg msg: ${data}`);
             });
 
             ls.on('close', (code) => {
-                //console.log(`子进程使用代码 ${code} 关闭所有 stdio`);
+                //myLog(`子进程使用代码 ${code} 关闭所有 stdio`);
             });
 
             ls.on('exit', (code) => {
                 if (code == 0) {
-                    console.log(`FFmpeg合成完成 退出码:${code}`);
+                    myLog(`FFmpeg合成完成 退出码:${code}`);
                     return resolve(this.mp4SavePath)
                 } else {
-                    console.log(`FFmpeg合成失败了 退出码:${code}`);
+                    myLog(`FFmpeg合成失败了 退出码:${code}`);
                     return reject(this.mp4SavePath)
                 }
             });
