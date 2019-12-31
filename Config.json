@@ -1,0 +1,14 @@
+{
+    "list": [
+        {
+            "m3u8Url": "https://yushou.qitu-zuida.com/20180716/9370_8a4932d6/800k/hls/index.m3u8",
+            "mp4Name": "hzw_1",
+            "hostname": ""
+        },
+        {
+            "m3u8Url": "https://yushou.qitu-zuida.com/20180716/9369_897b5d8d/800k/hls/index.m3u8",
+            "mp4Name": "hzw_2",
+            "hostname": ""
+        }
+    ]
+}
