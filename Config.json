@@ -9,6 +9,36 @@
             "m3u8Url": "https://yushou.qitu-zuida.com/20180716/9369_897b5d8d/800k/hls/index.m3u8",
             "mp4Name": "hzw_2",
             "hostname": ""
+        },
+        {
+            "m3u8Url": "https://yushou.qitu-zuida.com/20180716/9369_897b5d8d/800k/hls/index.m3u8",
+            "mp4Name": "hzw_3",
+            "hostname": ""
+        },
+        {
+            "m3u8Url": "https://yushou.qitu-zuida.com/20180716/9373_b11e5767/800k/hls/index.m3u8",
+            "mp4Name": "hzw_4",
+            "hostname": ""
+        },
+        {
+            "m3u8Url": "https://yushou.qitu-zuida.com/20180716/9372_31d09861/800k/hls/index.m3u8",
+            "mp4Name": "hzw_5",
+            "hostname": ""
+        },
+        {
+            "m3u8Url": "https://yushou.qitu-zuida.com/20180716/9371_73fbbe10/800k/hls/index.m3u8",
+            "mp4Name": "hzw_6",
+            "hostname": ""
+        },
+        {
+            "m3u8Url": "https://yushou.qitu-zuida.com/20180716/9380_fbe2aec6/800k/hls/index.m3u8",
+            "mp4Name": "hzw_7",
+            "hostname": ""
+        },
+        {
+            "m3u8Url": "https://yushou.qitu-zuida.com/20180716/9379_793e114d/800k/hls/index.m3u8",
+            "mp4Name": "hzw_8",
+            "hostname": ""
         }
     ]
 }

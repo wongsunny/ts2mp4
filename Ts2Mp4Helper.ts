@@ -23,10 +23,10 @@ class Ts2Mp4Helper {
 
         this.m3u8SavePath = `./res/m3u8/${mp4Name}.m3u8`
         this.mp4SavePath = `./res/mp4/${mp4Name}.mp4`
-        this.tsSavePath = `./res/ts/${mp4Name}`
+        this.tsSavePath = `../ts/${mp4Name}` //ts数据存放在工程外面 ts文件和ts脚本冲突 编辑器很卡顿
         this.ffmpegConfigSavePath = `${this.tsSavePath}/${mp4Name}.txt`
 
-        let dirs = ['./res/m3u8', './res/mp4', `./res/ts/${mp4Name}`]
+        let dirs = ['./res/m3u8', './res/mp4', `../ts/${mp4Name}`]
         for (const dir of dirs) {
             if (!fs.existsSync(dir)) {
                 fs.mkdirpSync(dir)
@@ -61,7 +61,7 @@ class Ts2Mp4Helper {
         let successTsList = await this.downloadTsList(tsList)
         //生成FFmpeg配置文件
         this.createFfmpegConfig(successTsList)
-        await this.useFfmpegCompoundMp4()
+        return await this.useFfmpegCompoundMp4()
     }
 
 
@@ -236,7 +236,7 @@ class Ts2Mp4Helper {
      * 使用FFmpeg合成MP4
      * ffmpeg -i input.txt -acodec copy -vcodec copy -absf aac_adtstoasc ${resultFile}
      */
-    private useFfmpegCompoundMp4() {
+    private useFfmpegCompoundMp4(): Promise<string> {
         console.log(' 使用FFmpeg合成MP4')
         return new Promise((resolve, reject) => {
             let ls = child_process.spawn(
