@@ -8,6 +8,7 @@
 ### ./Config.json配置.m3u8
 
 ```
+ "parallelMax": 5, //最大并行下载数量
 /**
  * 下载配置
  */
