@@ -5,10 +5,10 @@ import * as child_process from 'child_process'
 const debug = false
 
 var myLog = (message?: any, ...optionalParams: any[]) => {
-    debug && console.log(message, optionalParams)
+    debug && console.log(message, ...optionalParams)
 }
 var myError = (message?: any, ...optionalParams: any[]) => {
-    debug && console.error(message, optionalParams)
+    debug && console.error(message, ...optionalParams)
 }
 
 console.log('是否开启debug模式:', debug)
